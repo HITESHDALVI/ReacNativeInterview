@@ -24,7 +24,29 @@ Interview questions and interview questions
   To verify the upload:
   I check the HTTP status code — typically 200 or 201 indicates success.
   I also parse the server response to ensure the backend confirms the file was saved (e.g., a file URL or file ID is returned).
-
 On the UI side, I update the state to show a success message or show the uploaded image thumbnail.
-
 Additionally, if needed, I track upload progress using axios’s onUploadProgress to provide the user with a progress bar or loader.
+
+3. 👉 “How do you handle performance optimization in React Native applications, especially when dealing with complex or large lists?”
+  Answer -> “To optimize performance in React Native, especially when working with large or complex lists, I usually take a multi-step approach:
+  Efficient List Rendering –
+  Instead of ScrollView, I prefer FlatList or SectionList since they render only the visible items using virtualization.
+  I fine-tune props like initialNumToRender, maxToRenderPerBatch, and windowSize to balance performance and user experience.
+  I always provide a stable keyExtractor to minimize unnecessary re-renders.
+  Memoization & Pure Components –
+  I wrap the renderItem component with React.memo (or useCallback when passing functions) so that items only re-render when their props actually change.
+  For complex row components, I also use useMemo to cache expensive computations
+  Image & Asset Optimization 
+  Lazy-load and cache images using libraries like react-native-fast-image.
+  Preload and compress images/videos when necessary to reduce load time.
+  Avoiding Unnecessary State Updates –
+  I keep the state localized and avoid putting large data arrays in global contexts (like Redux) unless necessary.
+  For example, instead of updating the entire list on a minor change, I only update the affected item.
+  JS and Native Bridge Optimization –
+  Minimize frequent communication over the React Native bridge (e.g., avoid sending huge JSON payloads or calling native methods in tight loops).
+  Batch updates or debounce them where possible.
+  Profiling & Monitoring 
+  I use tools like Flipper or React Native Performance Monitor to identify bottlenecks such as slow renders, high memory usage, or unnecessary re-renders.
+  Based on profiling, I decide whether to refactor, paginate, or offload work to background threads.
+  Additionally, for extremely large datasets, I sometimes implement infinite scroll with pagination or use specialized libraries like recyclerlistview for better virtualization than FlatList.
+  Overall, my goal is to balance smooth scrolling, responsive UI, and minimal memory footprint.”

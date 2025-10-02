@@ -50,3 +50,30 @@ Additionally, if needed, I track upload progress using axios’s onUploadProgres
   Based on profiling, I decide whether to refactor, paginate, or offload work to background threads.
   Additionally, for extremely large datasets, I sometimes implement infinite scroll with pagination or use specialized libraries like recyclerlistview for better virtualization than FlatList.
   Overall, my goal is to balance smooth scrolling, responsive UI, and minimal memory footprint.”
+
+4. Can you explain the React Native architecture, especially the JS thread, shadow thread, and UI thread?
+   Ansswer -> React Native’s architecture is based on a multi-threaded model where different responsibilities are split across threads to ensure performance and responsiveness. The three main threads involved are:
+JavaScript Thread (JS Thread):
+This is where all the business logic of the React Native app runs.
+When we write React or JavaScript code (like components, state updates, API calls, event handling), it gets executed on this thread.
+It’s a single-threaded, event loop–based model, similar to how JavaScript works in the browser.
+The JS thread never directly manipulates UI—it only calculates what the UI should look like and then sends that information to the native side.
+Shadow Thread:
+This is a background thread where React Native uses a layout engine called Yoga to calculate the layout of components.
+When the JS thread decides the UI tree (what elements exist and their properties), this layout calculation (flexbox, positions, dimensions) happens in the shadow thread.
+Offloading layout calculation to the shadow thread ensures that the UI thread remains free for smooth rendering and doesn’t get blocked by heavy computations.
+UI Thread (a.k.a. Main Thread):
+This is the thread where actual native rendering happens.
+The UI thread is responsible for drawing UI elements, handling animations, and processing touch events.
+It receives the final layout instructions (calculated by the shadow thread) and renders the UI natively using platform-specific APIs (like UIView in iOS and View in Android).
+Since this is the most critical thread for user experience, React Native tries to keep it as light as possible to maintain 60fps performance.
+How they communicate:
+The threads communicate through a bridge (in the older architecture). The JS thread sends JSON messages with UI changes, which go through the bridge to the shadow thread and then the UI thread.
+In the new architecture (Fabric + JSI), this communication is more direct, with synchronous and asynchronous calls, making it faster and reducing bottlenecks.
+Example:
+Let’s say I update a component’s style in React Native:
+The JS thread registers the change.
+The shadow thread calculates the new layout.
+The UI thread applies that layout to native views and renders it on the screen.
+
+5.  

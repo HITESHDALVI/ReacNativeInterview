@@ -203,4 +203,32 @@ Use libraries like Axios or fetch with proper timeout, retry, and cancellation h
 Prefer background-safe network calls using InteractionManager or native modules for long-running requests.
 By combining secure storage, encrypted communication, token best practices, and runtime safety, we minimize the risk of leaks or attacks while maintaining smooth app functionality.”
 
-19. 
+19. “Can you explain the execution model of React Native and the layers involved when JavaScript code runs?”
+-> React Native’s execution model is basically split into three major layers.
+The first one is the JavaScript Layer, which is where all my React code and business logic runs. This executes inside a JavaScript engine like Hermes or JSC.
+The second is the Native Layer, which includes the platform-specific code — things like UI components, Android/iOS APIs, and any native modules written in Kotlin, Java, Swift, or Objective-C.
+And in between them, we have a Communication Layer.
+In the old architecture, this communication happened over the Bridge, which was JSON-based and asynchronous. So JS had to serialize data, send it as a message, and the native side would process it.
+In the new architecture, React Native uses JSI, which allows JavaScript to call native functions directly in C++ without serialization. This enables TurboModules and Fabric, making communication much faster and more synchronous.
+So overall, JS runs separately, Native runs separately, and they coordinate through either the Bridge or JSI depending on the architecture.
+
+20. what exactly are TurboModules, and why did React Native even introduce them?
+-> TurboModules are the new architecture version of Native Modules.
+The main purpose behind them was to remove the limitations of the old Bridge. Native Modules in the old architecture were slow because everything had to go through JSON serialization, and all modules were loaded eagerly at startup.
+TurboModules solve this by using JSI. Instead of JSON messages, JavaScript can directly call the native functions through a C++ interface, which makes it much faster and removes the Bridge completely.
+They also support lazy loading — a module is loaded only when the app actually needs it — which reduces startup time and memory usage.
+So in short, TurboModules give us faster communication, lower memory usage, optional synchronous execution, and much better performance compared to the old Native Modules.
+
+21. Tell me technically how TurboModules are faster. What exactly changes when JSI replaces the Bridge?
+-> TurboModules are faster mainly because they remove the JSON-based Bridge.
+In the old architecture, every JS-to-native call went through a batched queue, had to be converted into JSON, copied across threads, and then deserialized on the native side. This created a lot of overhead, especially for frequent or high-volume calls.
+With TurboModules, React Native uses JSI. Instead of JSON, native functions are exposed as C++ HostObjects. JavaScript can call them directly through function pointers without serialization, without batching, and without thread hopping.
+This makes the calls almost zero-cost, significantly reduces memory usage, and also enables lazy loading of modules, which improves startup time.
+So the performance boost comes from: no Bridge, no JSON, no copying, direct C++ calls, and lazy loading.
+
+
+21.HOW does JavaScript actually call a C++ method?
+JSI allows JavaScript to call C++ functions by exposing them as HostObjects.
+A HostObject is a C++ class that overrides get() and set() methods. Inside the get() method, we return a HostFunction, which is basically a C++ lambda wrapped in a JSI function object.
+Once registered with the JS runtime, JavaScript sees these as normal JS methods. When JS calls that method, it doesn’t go through the Bridge — the JS engine directly invokes the C++ function pointer.
+So instead of JSON messages and queues, TurboModules expose their native methods as C++ HostFunctions, and JavaScript executes them directly through the JSI runtime. This removes serialization, copying, thread hopping, and dramatically improves performance.
